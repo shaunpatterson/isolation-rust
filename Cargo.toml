@@ -1,0 +1,9 @@
+[package]
+
+name = "isolation"
+version = "0.0.1"
+authors = [ "shaunpatterson@gmail.com" ]
+
+[dependencies]
+itertools = "*"
+
