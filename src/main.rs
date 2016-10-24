@@ -4,16 +4,19 @@ use itertools::Itertools;
 
 pub mod board;
 pub mod player;
+pub mod game;
 
 use board::Board;
 use player::IsolationPlayer;
 use player::HumanPlayer;
+use game::Game;
 
 fn main() {
 
     let mut board: Board = Board::new(5, 5);
 
     let mut player1: HumanPlayer = HumanPlayer;
+    let mut player2: HumanPlayer = HumanPlayer;
 
     let legal_moves = vec!((0, 0), (1, 1), (2, 2));
 
@@ -31,6 +34,8 @@ fn main() {
         .map(|x| format!("{}", x))
         .join(","));
 
+
+    let mut game = Game::new(board, player1, player2);
 
 
     // player1.take_move(&mut board, &legal_moves);

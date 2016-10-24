@@ -102,13 +102,13 @@ impl Board {
     }
 
     pub fn set_cell(&mut self, move_index:u16) {
-        self.state |= (1 << move_index as u64);
+        self.state |= 1 << move_index as u64;
     }
 
     // Converts a move index (0-size) to (row, col)
     pub fn move_index_to_move(&self, move_index:u16) -> (u16, u16) {
         let row = (move_index / self.width) as u16;
-        let col = (move_index % self.width);
+        let col = move_index % self.width;
         (row, col)
     }
 
