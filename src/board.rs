@@ -1,12 +1,7 @@
 use std::fmt;
 use std::collections::HashMap;
 
-// (row, col) type
-type MoveIndex = u16;
-
-// (row * width + col) type
-type MoveOffset = u16;
-
+use types::{ MoveIndex, MoveOffset, MoveTuple };
 
 
 #[derive(PartialEq, Eq, Hash)]
@@ -106,20 +101,26 @@ impl Board {
     }
 
     // Converts a move index (0-size) to (row, col)
-    pub fn move_index_to_move(&self, move_index:u16) -> (u16, u16) {
+    pub fn move_index_to_move(&self, move_index:u16) -> MoveTuple {
         let row = (move_index / self.width) as u16;
         let col = move_index % self.width;
         (row, col)
     }
 
-    pub fn get_legal_moves(&self, last_move:u16) -> Vec<u16> {
+    pub fn get_legal_moves(&self, last_move:u16) -> Vec<(MoveOffset, MoveTuple)> {
 
-        if self.move_count < 2 {
-            return self.get_first_moves();
-        } else {
-            return vec!();
-        }
+        let moves = match self.move_count {
+            0 | 1 => self.get_first_moves(),
+            _ => self.calculate_moves(last_move)
+        };
 
+        moves.iter()
+            .map(|x| (*x, self.move_index_to_move(*x)))
+            .collect::<Vec<(MoveOffset, MoveTuple)>>()
+    }
+
+    fn calculate_moves(&self, last_move:u16) -> Vec<MoveOffset> {
+        vec!()
     }
 
     fn get_first_moves(&self) -> Vec<u16> {
