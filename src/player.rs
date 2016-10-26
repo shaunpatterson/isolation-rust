@@ -5,22 +5,21 @@ use types::*;
 use board::Board;
 
 
-
 pub trait IsolationPlayer {
     fn choose_move(&self, board: &Board, legal_moves:&Vec<(MoveOffset, MoveTuple)>) -> MoveOffset;
     fn take_move(&mut self, move_index: u16);
-    fn last_move(&self) -> (u16);
+    fn last_move(&self) -> Option<u16>;
 }
 
 pub struct HumanPlayer {
-    last_move: u16
+    last_move: Option<u16>
 }
 
 impl HumanPlayer {
 
     pub fn new() -> HumanPlayer {
         HumanPlayer {
-            last_move: 0
+            last_move: None
         }
     }
 
@@ -30,10 +29,13 @@ impl IsolationPlayer for HumanPlayer {
 
     fn choose_move(&self, board: &Board, legal_moves:&Vec<(MoveOffset, MoveTuple)>) -> MoveOffset {
 
+        let mut legal_moves = legal_moves.clone();
+        legal_moves.sort_by_key(|k| k.0);
+
         let choices = legal_moves
             .iter()
             .enumerate()
-            .map(|(i, &(o, (a, b)))| format!("{}: ({}, {})", i, a, b))
+            .map(|(i, &(o, (a, b)))| format!("{}: {} - ({}, {})", i, o, a, b))
             .join("\n");
 
         println!("Make a move: \n{}", choices);
@@ -53,10 +55,10 @@ impl IsolationPlayer for HumanPlayer {
     }
 
     fn take_move(&mut self, move_index: u16) {
-        self.last_move = move_index;
+        self.last_move = Some(move_index);
     }
 
-    fn last_move(&self) -> u16 {
+    fn last_move(&self) -> Option<u16> {
         self.last_move
     }
 
