@@ -1,15 +1,15 @@
 use board::Board;
 use player::IsolationPlayer;
 
-pub struct Game<P: IsolationPlayer> {
+pub struct Game<P: IsolationPlayer, SP: IsolationPlayer> {
     board: Board,
     player1: P,
-    player2: P
+    player2: SP
 }
 
-impl<P: IsolationPlayer> Game<P> {
+impl<P: IsolationPlayer, SP: IsolationPlayer> Game<P, SP> {
 
-    pub fn new(board: Board, player1: P, player2: P) -> Game<P> {
+    pub fn new(board: Board, player1: P, player2: SP) -> Game<P, SP> {
         Game {
             board: board,
             player1: player1,
@@ -26,12 +26,12 @@ impl<P: IsolationPlayer> Game<P> {
             println!("Active player {}", (active_player_index as u16) + 1);
             println!("{}", self.board.draw_board(self.player1.last_move(), self.player2.last_move()));
 
-            let mut active_player = match active_player_index {
+            let mut active_player:&mut IsolationPlayer = match active_player_index {
                 false => &mut self.player1,
                 true => &mut self.player2
             };
 
-            let legal_moves = self.board.get_legal_moves(active_player.last_move());
+            let legal_moves = self.board.get_legal_moves(&active_player.last_move());
             if legal_moves.len() == 0 {
                 match active_player_index {
                     false => println!("Player 1 lost"),
@@ -42,7 +42,7 @@ impl<P: IsolationPlayer> Game<P> {
             }
 
 
-            let chosen_move = active_player.choose_move(&self.board, &legal_moves);
+            let chosen_move = active_player.choose_move(&self.board, &active_player.last_move());
 
             println!("Chosen move offset: {}", chosen_move);
 
