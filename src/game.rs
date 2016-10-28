@@ -24,7 +24,7 @@ impl<P: IsolationPlayer, SP: IsolationPlayer> Game<P, SP> {
         loop {
             println!("Playing isolation");
             println!("Active player {}", (active_player_index as u16) + 1);
-            println!("{}", self.board.draw_board(self.player1.last_move(), self.player2.last_move()));
+            println!("{}", self.board.draw_board(&self.player1.last_move(), &self.player2.last_move()));
 
             let mut active_player:&mut IsolationPlayer = match active_player_index {
                 false => &mut self.player1,

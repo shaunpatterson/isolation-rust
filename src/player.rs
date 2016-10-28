@@ -1,4 +1,6 @@
 use std::io::{stdin};
+use std::slice;
+use std::cmp;
 use itertools::Itertools;
 
 use types::*;
@@ -12,11 +14,11 @@ pub trait IsolationPlayer {
 }
 
 pub struct HumanPlayer {
-    last_move: Option<u16>
+    last_move: Option<MoveOffset>
 }
 
 pub struct ComputerPlayer {
-    last_move: Option<u16>
+    last_move: Option<MoveOffset>
 }
 
 impl HumanPlayer {
@@ -82,19 +84,36 @@ impl ComputerPlayer {
         depth >= max_depth || board.get_legal_moves(last_move).len() == 0
     }
 
-    fn min_value(&self, board: &mut Board, last_move:&Option<MoveOffset>, depth: usize, max_depth: usize) -> i64 {
-        0i64
-    }
-
-    fn max_value(&self, board: &mut Board, last_move:&Option<MoveOffset>, depth: usize, max_depth: usize) -> i64 {
-        if self.terminal_state(board, last_move, depth, max_depth) {
-            return 1i64;
+    fn min_value(&self, board: Board, last_move:&Option<MoveOffset>, depth: usize, max_depth: usize) -> i64 {
+        if self.terminal_state(&board, last_move, depth, max_depth) {
+            return self.utility(&board);
         }
-        1i64
+        let mut v: i64 = i64::min_value();
+
+        for (next_move, next_board) in board.successors(last_move) {
+            v = cmp::min(v, self.max_value(next_board, &Some(next_move), depth + 1, max_depth));
+        }
+        return v;
     }
 
-    fn minmax(&self, board: &mut Board, last_move:&Option<MoveOffset>, max_depth:usize, maximizing_player: bool) {
-        println!("Successors: {:?}", board.successors(last_move));
+    fn max_value(&self, board: Board, last_move:&Option<MoveOffset>, depth: usize, max_depth: usize) -> i64 {
+        if self.terminal_state(&board, last_move, depth, max_depth) {
+            return self.utility(&board);
+        }
+        let mut v: i64 = i64::min_value();
+
+        for (next_move, next_board) in board.successors(last_move) {
+            v = cmp::max(v, self.min_value(next_board, &Some(next_move), depth + 1, max_depth));
+        }
+        return v;
+    }
+
+    fn minimax(&self, board: &mut Board, last_move:&Option<MoveOffset>, max_depth:usize, maximizing_player: bool) -> MoveOffset {
+        let (best_move, _) = *board.successors(last_move).iter()
+                                    .max_by_key(|&&(next_move, next_board)| self.min_value(next_board, &Some(next_move), 0, max_depth))
+                                    .unwrap();
+        println!("Best move: {}", best_move);
+        best_move
     }
 }
 
@@ -103,9 +122,7 @@ impl IsolationPlayer for ComputerPlayer {
     fn choose_move(&self, board: &Board, last_move:&Option<MoveOffset>) -> MoveOffset {
         let mut working_board = *board;
 
-        self.minmax(&mut working_board, last_move, 4, true);
-
-        0u16
+        self.minimax(&mut working_board, last_move, 4, true)
     }
 
 

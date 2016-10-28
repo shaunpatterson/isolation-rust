@@ -39,12 +39,12 @@ impl Board {
         self.state = state;
     }
 
-    pub fn draw_board(&self, p1: Option<MoveOffset>, p2: Option<MoveOffset>) -> String {
-        let p1_last_move = match p1 {
+    pub fn draw_board(&self, p1: &Option<MoveOffset>, p2: &Option<MoveOffset>) -> String {
+        let p1_last_move = match *p1 {
             Some(n) => n as i32,
             _ => -1
         };
-        let p2_last_move = match p2 {
+        let p2_last_move = match *p2 {
             Some(n) => n as i32,
             _ => -1
         };
@@ -93,11 +93,17 @@ impl Board {
         self.state |= 1 << move_offset as u64;
     }
 
-    pub fn forecast(&self, move_offset: MoveOffset) -> u64 {
-        self.state | 1 << move_offset as u64
+    pub fn forecast(&self, move_offset: MoveOffset) -> Board {
+        Board {
+            width: self.width,
+            height: self.height,
+            size: self.size,
+            state: self.state | 1 << move_offset as u64,
+            move_count: self.move_count + 1
+        }
     }
 
-    pub fn successors(&self, last_move: &Option<MoveOffset>) -> Vec<(MoveOffset, u64)> {
+    pub fn successors(&self, last_move: &Option<MoveOffset>) -> Vec<(MoveOffset, Board)> {
         self.get_legal_moves(last_move).iter()
                 .map(|&(m, _)| (m, self.forecast(m)))
                 .collect()
